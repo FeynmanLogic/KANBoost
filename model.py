@@ -30,6 +30,10 @@ class MLPrefetchModel(object):
         Unique Instr Id, Cycle Count, Load Address, Instruction Pointer of the Load, LLC hit/miss
         '''
         pass
+        # for line in data:
+        #     for instr_id, cycle,load_address, ip,llc_hit in line:
+                #train model using monte carlo equations on Blocks under each page.
+
 
     @abstractmethod
     def generate(self, data):
