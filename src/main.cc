@@ -15,9 +15,9 @@ uint8_t warmup_complete[NUM_CPUS],
 uint8_t prefetch_warmup_complete;
 
 uint64_t warmup_instructions = 1000000,
-         simulation_instructions = 10000000,
+         simulation_instructions = 1000000,
          champsim_seed;
-uint64_t prefetch_warmup_instructions = 10000000;
+uint64_t prefetch_warmup_instructions = 1000000;
 uint8_t all_prefetch_warmup_complete = 0;
 time_t start_time;
 
@@ -597,8 +597,7 @@ int main(int argc, char **argv)
             break;
         case 'p':
             prefetch_warmup_instructions = atol(optarg);
-            if (prefetch_warmup_instructions < 10000000)
-                prefetch_warmup_instructions = 10000000;
+
             break;
         case 'h':
             show_heartbeat = 0;
