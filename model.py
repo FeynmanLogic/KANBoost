@@ -57,41 +57,59 @@ class MLPrefetchModel(object):
 
 class NextLineModel(MLPrefetchModel):
 
+    def __init__(self, model):
+        '''
+        Initializes the model for prefetching.
+        Here we can pass a KAN-based model or a different model depending on the implementation.
+        '''
+        self.model = model  # This could be the KAN model or another model
+
     def load(self, path):
         # Load your pytorch / tensorflow model from the given filepath
         print('Loading ' + path + ' for NextLineModel')
+        self.model.load(path)
 
     def save(self, path):
         # Save your model to a file
         print('Saving ' + path + ' for NextLineModel')
+        self.model.save(path)
 
     def train(self, data):
         '''
-        Train your model here using the data
+        Train your model here using the data.
 
         The data is the same format given in the load traces. Namely:
         Unique Instr Id, Cycle Count, Load Address, Instruction Pointer of the Load, LLC hit/miss
         '''
         print('Training NextLineModel')
+        self.model.train(data)
 
     def generate(self, data):
         '''
-        Generate the prefetches for the prefetch file for ChampSim here
+        Generate the prefetches for the prefetch file for ChampSim here.
 
         As a reminder, no looking ahead in the data and no more than 2
-        prefetches per unique instruction ID
+        prefetches per unique instruction ID.
 
         The return format for this function is a list of (instr_id, pf_addr)
-        tuples as shown below
+        tuples as shown below:
+        [
+            (instr_id, pf_addr),
+            (instr_id, pf_addr)
+        ]
         '''
         print('Generating for NextLineModel')
         prefetches = []
         for (instr_id, cycle_count, load_addr, load_ip, llc_hit) in data:
-            # Prefetch the next two blocks
-            prefetches.append((instr_id, ((load_addr >> 6) + 1) << 6))
-            prefetches.append((instr_id, ((load_addr >> 6) + 2) << 6))
+            # Get the prefetch addresses predicted by the model
+            prefetch_addr1, prefetch_addr2 = self.model.predict(load_addr)
+
+            # Append both prefetches with the instruction ID
+            prefetches.append((instr_id, prefetch_addr1))
+            prefetches.append((instr_id, prefetch_addr2))
 
         return prefetches
+
 
 '''
 # Example PyTorch Model
