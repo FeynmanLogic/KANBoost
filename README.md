@@ -1,3 +1,20 @@
+# KANBoost: Offset-Prefetcher using Kolmogorov-Arnold Networks (KANs)
+
+We aim to build an offset-prefetcher, which predicts the next memory offset based on the history of block accesses. This is implemented using **Kolmogorov-Arnold Networks (KANs)**, a state-of-the-art learning model based on the **Kolmogorov-Arnold Representation**, which demonstrates that any bounded, continuous multivariate function can be represented as the summation of the functions of its constituent variables.
+
+## Implementation Details
+
+We implement this using the **Pykan** library, a newly created library for KANs. The project is structured around the following key considerations:
+
+### 1. Using Classification Instead of Regression
+Memory patterns are complex, making them difficult to understand and train using traditional regression models. Key reasons for choosing classification include:
+- **Overfitting risks**: Regression can overfit due to the relatively smaller feature space and fail to generalize well across different patterns.
+- **Training time**: Regression models can have very high training times, which may degrade performance. Hence, classification is used to better categorize and predict patterns effectively.
+
+### 2. Tracking Long-term Dependencies
+Memory access patterns often have long-term dependencies. To capture this, we implement a **recurrence relation** in the perceptron to ensure that long-term dependencies are preserved and incorporated into the model’s prediction process.
+The following is the framework released as part of ISCA 2021 that we use for testing.
+
 # Modified ChampSim for ML Prefetching Competition
 
 We will use ChampSim to evaluate the effectiveness of your ML prefetchers.  You
