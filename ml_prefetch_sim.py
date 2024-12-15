@@ -1,4 +1,5 @@
 ###---#!/usr/bin/env python3
+#!/c/Python312/python
 
 import argparse
 import os
@@ -219,16 +220,16 @@ def run_command():
                 exit(-1)
 
             if seed is not None:
-                cmd = '{binary} -prefetch_warmup_instructions {warm}000000 -simulation_instructions {sim}000000 -seed {seed} -traces {trace} > {results}/{base_trace}-{base_binary}.txt 2>&1'.format(
+                cmd = './{binary} -prefetch_warmup_instructions {warm}0000 -simulation_instructions {sim}000000 -seed {seed} -traces {trace} > {results}/{base_trace}-{base_binary}.txt 2>&1'.format(
                     binary=binary, warm=args.num_prefetch_warmup_instructions, sim=args.num_instructions,
                     trace=execution_trace, seed=seed, results=args.results_dir,
                     base_trace=os.path.basename(execution_trace), base_binary=os.path.basename(binary))
             else:
-                cmd = '{binary} -prefetch_warmup_instructions {warm}000000 -simulation_instructions {sim}000000 -traces {trace} > {results}/{base_trace}-{base_binary}.txt 2>&1'.format(
+                cmd = './{binary} -prefetch_warmup_instructions {warm}0000 -simulation_instructions {sim}000000 -traces {trace} > {results}/{base_trace}-{base_binary}.txt 2>&1'.format(
                     binary=binary, warm=args.num_prefetch_warmup_instructions, sim=args.num_instructions,
                     trace=execution_trace, results=args.results_dir, base_trace=os.path.basename(execution_trace),
                     base_binary=os.path.basename(binary))
-
+            cmd='bash '+cmd
             print('Running "' + cmd + '"')
 
             os.system(cmd)
@@ -237,18 +238,18 @@ def run_command():
         if not os.path.exists(default_prefetcher_binary):
             print('Prefetcher ChampSim binary not found')
             exit(-1)
-
+        # Added |./|{binary} 
         if seed is not None:
-            cmd = '<{prefetch} {binary} -prefetch_warmup_instructions {warm}000000 -simulation_instructions {sim}000000 -seed {seed} -traces {trace} > {results}/{base_trace}-{base_binary}.txt 2>&1'.format(
+            cmd = '<{prefetch} ./{binary} -prefetch_warmup_instructions {warm}000000 -simulation_instructions {sim}000000 -seed {seed} -traces {trace} > {results}/{base_trace}-{base_binary}.txt 2>&1'.format(
                 prefetch=args.prefetch, binary=default_prefetcher_binary, warm=args.num_prefetch_warmup_instructions, sim=args.num_instructions,
                 trace=execution_trace, seed=seed, results=args.results_dir,
                 base_trace=os.path.basename(execution_trace), base_binary=args.name)#os.path.basename(default_prefetcher_binary))
         else:
-            cmd = '<{prefetch} {binary} -prefetch_warmup_instructions {warm}000000 -simulation_instructions {sim}000000 -traces {trace} > {results}/{base_trace}-{base_binary}.txt 2>&1'.format(
+            cmd = '<{prefetch} ./{binary} -prefetch_warmup_instructions {warm}000000 -simulation_instructions {sim}000000 -traces {trace} > {results}/{base_trace}-{base_binary}.txt 2>&1'.format(
                 prefetch=args.prefetch, binary=default_prefetcher_binary, warm=args.num_prefetch_warmup_instructions, sim=args.num_instructions,
                 trace=execution_trace, results=args.results_dir, base_trace=os.path.basename(execution_trace),
                 base_binary=args.name)#os.path.basename(default_prefetcher_binary))
-
+        cmd='bash '+cmd
         print('Running "' + cmd + '"')
 
         os.system(cmd)
@@ -330,7 +331,7 @@ def eval_command():
         trace = fn.split('-hashed_perceptron-')[0]
         if trace not in traces:
             traces[trace] = {}
-        if 'from_file' in fn:
+        if 'from_file' in fn and trace in traces:
             traces[trace]['prefetch'] = os.path.join(args.results_dir, fn)
         else:
             for base_fn in baseline_fns:
@@ -338,11 +339,12 @@ def eval_command():
                     traces[trace][base_fn] = os.path.join(args.results_dir, fn)
 
     stats = ['Trace,Baseline,Accuracy,Coverage,MPKI,MPKI_Improvement,IPC,IPC_Improvement']
+    print(traces)
     for trace in traces:
         d = traces[trace]
         if 'no' in d:
             stats.append(compute_stats(trace, d['no'], baseline_name='no'))
-            stats.append(compute_stats(trace, d['prefetch'], d['no'], baseline_name='yours'))
+            stats.append(compute_stats(trace, d['prefetch'], d['no'], baseline_name='KANBoost'))
         else:
             stats.append(compute_stats(trace, d['prefetch'], baseline_name='No Baseline'))
         for fn in baseline_fns:
